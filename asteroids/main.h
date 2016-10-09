@@ -41,44 +41,24 @@
 #define GAME 1
 #define MENU 2
 
-// data
-Ship *player;
-vector<Asteroid*> *asteroids;
-vector<Bullet*> *bullets;
-vector<Explosion*> *explosions;
-int level;
-int destroyedAsteroids;
-int nextLevel;
-bool game_loop = true;
-clock_t prevFrame;
-clock_t thisFrame;
-ALLEGRO_DISPLAY *display;
-ALLEGRO_KEYBOARD_STATE *keyboard_state;
-ALLEGRO_COLOR uiColor;
-ALLEGRO_FONT *uiFont;
-float uiHue;
-char* levelMsg;
-char* nextLevelMsg;
-int game_state;
-
 // functions
 int main();
-int initData();
 int initAllegro();
-void handleInput();
-void calcPhysics();
-void render();
-void keepFPS();
-void burryDead();
-void gameLogic();
+
+// allegro is tha bast
+extern ALLEGRO_DISPLAY *display;
+extern ALLEGRO_KEYBOARD_STATE *keyboard_state;
+extern ALLEGRO_COLOR uiColor;
+extern ALLEGRO_FONT *uiFont;
+extern float uiHue;
 
 // sprites
-ALLEGRO_BITMAP *spaceshipSprite;
-ALLEGRO_BITMAP *bulletSprite;
-ALLEGRO_BITMAP *asteroidSprite;
-ALLEGRO_BITMAP *explosionSprite;
-ALLEGRO_BITMAP *space_bg;
-ALLEGRO_BITMAP *heartSprite;
+extern ALLEGRO_BITMAP *spaceshipSprite;
+extern ALLEGRO_BITMAP *bulletSprite;
+extern ALLEGRO_BITMAP *asteroidSprite;
+extern ALLEGRO_BITMAP *explosionSprite;
+extern ALLEGRO_BITMAP *space_bg;
+extern ALLEGRO_BITMAP *heartSprite;
 
 // data structures
 
@@ -370,68 +350,46 @@ public:
 	}
 };
 
+class Game {
+	Ship *player;
+	std::vector<Asteroid*> *asteroids;
+	std::vector<Bullet*> *bullets;
+	std::vector<Explosion*> *explosions;
 
+	int level;
+	int destroyedAsteroids;
+	int nextLevel;
+	bool game_loop;
+
+	char* levelMsg;
+	char* nextLevelMsg;
+
+	void handleInput();
+	void calcPhysics();
+	void render();
+	void burryDead();
+	void keepFPS();
+	void gameLogic();
+	void endGame(int end_mode);
+public:
+	Game();
+	void gameLoop();
+};
 
 class Menu {
 private:
-	char** items;
-	int selecetedItem;
-	bool showMenu;
+	char **items;
+	int selectedItem;
+	bool menu_loop;
 	bool toExecute;
+
+	void exitBeautifully();
+	void startGameBeautifully();
+	void handleInput();
+	void render();
+	void execute();
+	void keepFPS();
 public:
-
-	Menu() {
-		toExecute = false;
-		showMenu = true;
-		items = (char**)calloc(2, sizeof(char*));
-		char *newGame = "NEW GAME";
-		char *exit = "EXIT";
-		items[0] = newGame;
-		items[1] = exit;
-		selecetedItem = 0;
-	}
-
-	bool isShowMenu() {
-		return showMenu;
-	}
-
-	void render() {
-		al_draw_text(uiFont, uiColor, WIDTH / 2 - 100, HEIGHT / 2 - 100, NULL, items[0]);
-		al_draw_text(uiFont, uiColor, WIDTH / 2 - 100, HEIGHT / 2 + 100, NULL, items[1]);
-		if (selecetedItem == 0)
-			al_draw_rotated_bitmap(spaceshipSprite, 16, 16, WIDTH / 2 - 132, HEIGHT / 2 - 100, PI, NULL);
-		else if (selecetedItem == 1)
-			al_draw_rotated_bitmap(spaceshipSprite, 16, 16, WIDTH / 2 - 132, HEIGHT / 2 + 100, PI, NULL);
-	}
-
-	void handleInput() {
-		al_get_keyboard_state(keyboard_state);
-		if (!keyboard_state) {
-			cerr << "Failed to get keyboard state.\n";
-			exit(2);
-		}
-		if (al_key_down(keyboard_state, ALLEGRO_KEY_W)) {
-			selecetedItem = (selecetedItem + 1) % 2;
-		}
-		if (al_key_down(keyboard_state, ALLEGRO_KEY_S)) {
-			selecetedItem = (selecetedItem - 1) % 2;
-		}
-		if (al_key_down(keyboard_state, ALLEGRO_KEY_SPACE)) {
-			toExecute = true;
-		}
-	}
-
-	void execute() {
-		if (!toExecute) return;
-		if (selecetedItem == 0) {
-			initData();
-			showMenu = false;
-			game_state = GAME;
-		}
-		if (selecetedItem == 1) {
-			cout << "See you next time!\nG'BAY\n";
-			exit(0);
-		}
-		toExecute = false;
-	}
+	Menu();
+	void menuLoop();
 };
